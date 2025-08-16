@@ -22,6 +22,33 @@ export class Canvas {
         }
     }
 
+    public drawCanvas(otherCanvas: Canvas, offsetX: number, offsetY: number): void {
+        for (let r = 0; r < otherCanvas.height * 4; r++) {
+            for (let c = 0; c < otherCanvas.width * 2; c++) {
+                if (otherCanvas.grid[r][c]) {
+                    this.set(c + offsetX, r + offsetY);
+                }
+            }
+        }
+    }
+
+    public writeText(text: string, x: number, y: number): void {
+        for (let i = 0; i < text.length; i++) {
+            const charCode = text.charCodeAt(i);
+            // This is a very basic implementation. Each character takes 2 braille dots horizontally and 4 vertically.
+            // This will need to be improved for proper text rendering.
+            for (let row = 0; row < 4; row++) {
+                for (let col = 0; col < 2; col++) {
+                    // Placeholder: just set a few dots to represent the character
+                    if (charCode !== 32) { // Don't draw for space
+                        if (row === 0 && col === 0) this.set(x * 2 + i * 2 + col, y * 4 + row);
+                        if (row === 3 && col === 1) this.set(x * 2 + i * 2 + col, y * 4 + row);
+                    }
+                }
+            }
+        }
+    }
+
     public toString(): string {
         let result = '';
         for (let r = 0; r < this.height; r++) {
