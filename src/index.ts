@@ -182,7 +182,7 @@ export function plot(
 
             // Draw y-axis tick on border
             if (border) {
-                output_grid[line_num][y_label_width - 1] = '┤'; // Right-facing tick on left border
+                output_grid[line_num][y_label_width] = '┤'; // Right-facing tick on left border
             }
         });
     }
