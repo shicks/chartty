@@ -80,7 +80,7 @@ export function plot(
     const border_height = border ? 2 : 0;
 
     const y_label_width = ylabels > 0 ? Math.max(...yTicks.map(tick => tick.toFixed(2).length)) + 1 : 0; // +1 for the tick mark
-    const x_label_height = xlabels > 0 ? 1 : 0; // Assuming 1 line for x-labels
+    const x_label_height = xlabels > 0 ? 2 : 0; // Assuming 2 lines for x-labels (1 for label, 1 for spacing)
 
     const required_plot_width = width - y_label_width - border_width;
     const required_plot_height = height - x_label_height - border_height;
