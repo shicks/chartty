@@ -54,7 +54,7 @@ export function plot(
 
         const canvas_y = y_range === 0
             ? Math.floor(canvas_height_dots / 2)
-            : Math.floor(((py - ymin) / y_range) * (canvas_height_dots - 1));
+            : (canvas_height_dots - 1) - Math.floor(((py - ymin) / y_range) * (canvas_height_dots - 1));
 
         canvas.set(canvas_x, canvas_y);
     }
