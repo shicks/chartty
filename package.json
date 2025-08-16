@@ -1,8 +1,10 @@
 {
-  "name": "app",
-  "version": "1.0.0",
+  "name": "dotplot",
+  "version": "0.1.0",
   "description": "Pure JS library for making scatter plots in the terminal with braille dots",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist", "README.md", "LICENSE"],
   "scripts": {
     "build": "node node_modules/typescript/lib/tsc.js",
     "test": "jest",
@@ -10,16 +12,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shicks/js-plotille.git"
+    "url": "git+https://github.com/shicks/dotplot.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["terminal", "plot", "chart", "braille", "cli", "typescript", "javascript"],
+  "author": "Your Name <your.email@example.com>",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/shicks/js-plotille/issues"
+    "url": "https://github.com/shicks/dotplot/issues"
   },
-  "homepage": "https://github.com/shicks/js-plotille#readme",
+  "homepage": "https://github.com/shicks/dotplot#readme",
   "devDependencies": {
     "@types/jest": "^30.0.0",
     "jest": "^30.0.5",
