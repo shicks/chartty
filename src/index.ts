@@ -139,12 +139,12 @@ export function plot(
     }
 
     // Draw border
-    if (border) {
-        const plot_start_x = y_label_width + 1;
-        const plot_start_y = (border ? 1 : 0);
-        const plot_end_x = y_label_width + plot_width + 1;
-        const plot_end_y = (border ? 1 : 0) + plot_height + 1;
+    const plot_start_x = y_label_width + 1;
+    const plot_start_y = (border ? 1 : 0);
+    const plot_end_x = y_label_width + plot_width + 1;
+    const plot_end_y = (border ? 1 : 0) + plot_height + 1;
 
+    if (border) {
         // Corners
         output_grid[plot_start_y - 1][plot_start_x - 1] = '┌'; // Adjust offset
         output_grid[plot_start_y - 1][plot_end_x] = '┐'; // Adjust offset
@@ -168,7 +168,7 @@ export function plot(
     if (ylabels > 0) {
         yTicks.forEach(tick => {
             const label = tick.toFixed(2); // Truncate to 2 decimal places
-            const plot_area_offset_y = (border ? 1 : 0); // Adjust offset
+            const plot_area_offset_y = (border ? 1 : 0) + 1; // Adjust offset
             const line_num_unclamped = plot_area_offset_y + (1 - ((tick - ymin) / y_range)) * (plot_height - 1);
             const line_num = Math.floor(Math.max(0, Math.min(height - 1, line_num_unclamped)));
 
@@ -206,7 +206,7 @@ export function plot(
 
             // Draw x-axis tick on border
             if (border) {
-                output_grid[height - 1 - (border ? 1 : 0) - (x_label_height - 1)][Math.floor(canvas_x + y_label_width + (border ? 1 : 0))] = '┬'; // Upward-facing tick on bottom border
+                output_grid[plot_end_y][Math.floor(canvas_x + y_label_width + (border ? 1 : 0))] = '┬'; // Upward-facing tick on bottom border
             }
         });
     }
