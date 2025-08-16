@@ -1,4 +1,4 @@
-import { plot } from './src';
+import { plot } from '.';
 
 function generateRandomData(count: number) {
     const x: number[] = [];

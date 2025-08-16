@@ -32,10 +32,10 @@ interface Options {
     origin?: boolean; 
     // whether to draw a rectangle around the entire plot [false]
     border?: boolean;
-    // whether to label the x axis with tick values
-    xlabels?: boolean;
-    // whether to label the y axis with tick values 
-    ylabels?: boolean; 
+    // number of x-axis labels to display (default 0)
+    xlabels?: number;
+    // number of y-axis labels to display (default 0)
+    ylabels?: number; 
     // plot title centered on top line
     title?: string; 
     // name for x axis, printed on bottom of chart
@@ -50,6 +50,37 @@ Vertical text is added as appropriate for x-tick labels or y-axis name by stacki
 Actually drawing the axes has the significant drawback that it will be impossible to draw dots on the same character as the axis lines. 
 
 The actual scatter plot is done with Braille characters, so that each character in the string can plot up to 8 different points, in a 4 (high) by 2 (wide) grid. If multiple points fall onto the same dot, it is still only drawn once - there is no way to represent more than one point in a single dot.
+
+## Updated Requirements and Alignment Difficulties
+
+**Updated Requirements:**
+
+*   `xlabels` and `ylabels` are now numeric options, specifying the number of labels desired (default zero).
+*   `xlabels` are rendered as normal (horizontal) text.
+*   A border can be drawn around the plot using standard box-drawing characters (`border: boolean`).
+*   Tick marks are integrated into the border using outset lines (e.g., `┬` for x-axis, `┤` for y-axis).
+*   The main plot area shrinks to accommodate labels and the border.
+*   Labels truncate decimal places in a reasonable way (`toFixed(2)`).
+*   Labels are placed at integer multiples of a "nice round delta" for divisions.
+
+**Alignment Difficulties and Learnings:**
+
+The primary challenge has been accurately mapping data coordinates to character grid positions, especially when dealing with:
+
+1.  **Mixed Coordinate Systems:** The `Canvas` operates on a braille dot grid (2x4 dots per character), while the `output_grid` for labels and borders operates on a standard character grid (1x1 character per cell). This required careful conversion and offsetting.
+2.  **Dynamic Sizing:** The `y_label_width` and `x_label_height` (and consequently `plot_width` and `plot_height`) are dynamic based on label content and the presence of a border. This necessitated recalculating dimensions and offsets at various stages.
+3.  **Out-of-Bounds Access:** The most persistent issue was `TypeError: Cannot set properties of undefined` due to `line_num` or `col_num` going out of bounds of the `output_grid`. This was caused by:
+    *   **`_getTicks` generating values outside `ymin`/`ymax`:** While desirable for "nice" ticks, these values, when mapped to `output_grid` coordinates, could result in `line_num`s outside the `output_grid`'s `height`.
+    *   **Floating-point `line_num`:** Array indices must be integers. Initial calculations sometimes resulted in floating-point `line_num`s, leading to `undefined` access.
+    *   **Incorrect offset calculations:** Miscalculations in `plot_area_offset_y` or `plot_area_offset_x` led to labels being placed outside the `output_grid`.
+    *   **Insufficient `width`/`height`:** The initial `width` and `height` provided by the user might not be large enough to accommodate all labels and the border, leading to labels being cut off or causing out-of-bounds access. This was addressed by dynamically calculating `actual_width` and ensuring sufficient space.
+4.  **Label Alignment:** Centering x-labels and right-aligning y-labels required precise calculation of `start_col` and `col_num` based on label length and the overall grid structure.
+5.  **Tick Mark Alignment:** Integrating tick marks into the border and aligning them with the labels required careful placement relative to the label area and the border lines.
+
+The solution involved:
+*   **Clamping `line_num`:** Using `Math.max(0, Math.min(height - 1, line_num_unclamped))` to ensure `line_num` always stays within valid bounds.
+*   **Dynamic `y_label_width` and `actual_width`:** Calculating these dynamically based on actual label content and ensuring sufficient space.
+*   **Precise offset calculations:** Carefully calculating `plot_area_offset_y`, `plot_start_x`, etc., to ensure correct placement of plot, labels, and border.
 
 ## Technology
 
