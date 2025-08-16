@@ -89,7 +89,7 @@ export function plot(
     const actual_width = Math.max(width, min_width_for_x_labels);
 
     const plot_width = actual_width - y_label_width - border_width;
-    const plot_height = height - x_label_height - border_height;
+    const plot_height = height - border_height - x_label_height;
 
     const canvas = new Canvas(plot_width, plot_height);
 
@@ -125,7 +125,7 @@ export function plot(
     const output_grid: string[][] = [];
     for (let r = 0; r < height; r++) {
         const row: string[] = [];
-        for (let c = 0; c < width; c++) {
+        for (let c = 0; c < actual_width; c++) { // Use actual_width here
             row.push(' ');
         }
         output_grid.push(row);
@@ -134,31 +134,31 @@ export function plot(
     // Copy plot lines to the output grid with offsets
     for (let r = 0; r < plot_lines.length; r++) {
         for (let c = 0; c < plot_lines[r].length; c++) {
-            output_grid[r + x_label_height + (border ? 1 : 0)][c + y_label_width + (border ? 1 : 0)] = plot_lines[r][c];
+            output_grid[r + (border ? 1 : 0)][c + y_label_width + (border ? 1 : 0)] = plot_lines[r][c]; // Adjust offset
         }
     }
 
     // Draw border
     if (border) {
         const plot_start_x = y_label_width + 1;
-        const plot_start_y = x_label_height;
+        const plot_start_y = (border ? 1 : 0);
         const plot_end_x = y_label_width + plot_width + 1;
-        const plot_end_y = x_label_height + plot_height + 1;
+        const plot_end_y = (border ? 1 : 0) + plot_height + 1;
 
         // Corners
-        output_grid[plot_start_y][plot_start_x - 1] = '┌';
-        output_grid[plot_start_y][plot_end_x] = '┐';
+        output_grid[plot_start_y - 1][plot_start_x - 1] = '┌'; // Adjust offset
+        output_grid[plot_start_y - 1][plot_end_x] = '┐'; // Adjust offset
         output_grid[plot_end_y][plot_start_x - 1] = '└';
         output_grid[plot_end_y][plot_end_x] = '┘';
 
         // Horizontal lines
         for (let i = plot_start_x; i < plot_end_x; i++) {
-            output_grid[plot_start_y][i] = '─';
+            output_grid[plot_start_y - 1][i] = '─'; // Adjust offset
             output_grid[plot_end_y][i] = '─';
         }
 
         // Vertical lines
-        for (let i = plot_start_y + 1; i < plot_end_y; i++) {
+        for (let i = plot_start_y; i < plot_end_y; i++) {
             output_grid[i][plot_start_x - 1] = '│';
             output_grid[i][plot_end_x] = '│';
         }
@@ -168,7 +168,7 @@ export function plot(
     if (ylabels > 0) {
         yTicks.forEach(tick => {
             const label = tick.toFixed(2); // Truncate to 2 decimal places
-            const plot_area_offset_y = x_label_height + (border ? 1 : 0);
+            const plot_area_offset_y = (border ? 1 : 0); // Adjust offset
             const line_num_unclamped = plot_area_offset_y + (1 - ((tick - ymin) / y_range)) * (plot_height - 1);
             const line_num = Math.floor(Math.max(0, Math.min(height - 1, line_num_unclamped)));
 
@@ -199,14 +199,14 @@ export function plot(
 
             // Insert label into the output grid
             for (let i = 0; i < label.length; i++) {
-                if (col_num + i >= 0 && col_num + i < width && height - 1 >= 0 && height - 1 < height) {
+                if (col_num + i >= 0 && col_num + i < actual_width && height - 1 >= 0 && height - 1 < height) { // Use actual_width
                     output_grid[height - 1][col_num + i] = label[i];
                 }
             }
 
             // Draw x-axis tick on border
             if (border) {
-                output_grid[height - 1 - (border ? 1 : 0)][Math.floor(canvas_x + y_label_width + (border ? 1 : 0))] = '┬'; // Upward-facing tick on bottom border
+                output_grid[height - 1 - (border ? 1 : 0) - (x_label_height - 1)][Math.floor(canvas_x + y_label_width + (border ? 1 : 0))] = '┬'; // Upward-facing tick on bottom border
             }
         });
     }
