@@ -167,6 +167,9 @@ export function plot(
     // Draw y-labels
     if (ylabels > 0) {
         yTicks.forEach(tick => {
+            if (tick < ymin || tick > ymax) {
+                return; // Omit labels outside the data range
+            }
             const label = tick.toFixed(2); // Truncate to 2 decimal places
             const plot_area_offset_y = (border ? 1 : 0) + 1; // Adjust offset
             const line_num_unclamped = plot_area_offset_y + (1 - ((tick - ymin) / y_range)) * (plot_height - 1);
@@ -190,6 +193,9 @@ export function plot(
     // Draw x-labels
     if (xlabels > 0) {
         xTicks.forEach(tick => {
+            if (tick < xmin || tick > xmax) {
+                return; // Omit labels outside the data range
+            }
             const label = tick.toFixed(2); // Truncate to 2 decimal places
             // Calculate the x-position (column number) for the label
             const canvas_x = x_range === 0
