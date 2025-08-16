@@ -15,10 +15,11 @@ function generateRandomData(count: number) {
 const { x, y } = generateRandomData(1000);
 
 const plotOutput = plot(x, y, {
-    width: 100,
+    width: 120,
     height: 30,
     xlabels: 5,
     ylabels: 5,
+    border: true,
     // Add other options as needed for demonstration
 });
 

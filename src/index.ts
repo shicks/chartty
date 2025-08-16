@@ -32,15 +32,8 @@ export function plot(
         ymax = Math.max(...y),
         xlabels = 0,
         ylabels = 0,
+        border = false,
     } = options;
-
-    const y_label_width = ylabels > 0 ? 8 : 0; // Assuming max 8 characters for y-labels (e.g., -99.99)
-    const x_label_height = xlabels > 0 ? 1 : 0; // Assuming 1 line for x-labels
-
-    const plot_width = width - y_label_width;
-    const plot_height = height - x_label_height;
-
-    const canvas = new Canvas(plot_width, plot_height);
 
     // Helper function to get a "nice" number for axis divisions
     function _getNiceNum(range: number, round: boolean): number {
@@ -78,6 +71,28 @@ export function plot(
         return ticks;
     }
 
+    const yTicks = ylabels > 0 ? _getTicks(ymin, ymax, ylabels) : [];
+    const xTicks = xlabels > 0 ? _getTicks(xmin, xmax, xlabels) : [];
+
+    const max_x_label_length = xlabels > 0 ? Math.max(...xTicks.map(tick => tick.toFixed(2).length)) : 0;
+
+    const border_width = border ? 2 : 0;
+    const border_height = border ? 2 : 0;
+
+    const y_label_width = ylabels > 0 ? Math.max(...yTicks.map(tick => tick.toFixed(2).length)) + 1 : 0; // +1 for the tick mark
+    const x_label_height = xlabels > 0 ? 1 : 0; // Assuming 1 line for x-labels
+
+    const required_plot_width = width - y_label_width - border_width;
+    const required_plot_height = height - x_label_height - border_height;
+
+    const min_width_for_x_labels = y_label_width + border_width + max_x_label_length;
+    const actual_width = Math.max(width, min_width_for_x_labels);
+
+    const plot_width = actual_width - y_label_width - border_width;
+    const plot_height = height - x_label_height - border_height;
+
+    const canvas = new Canvas(plot_width, plot_height);
+
     const x_range = xmax - xmin;
     const y_range = ymax - ymin;
 
@@ -107,51 +122,91 @@ export function plot(
     const plot_lines = plot_string.split('\n');
 
     // Create a 2D character grid for the entire output
-    const output_grid: string[][] = Array(height).fill(0).map(() => Array(width).fill(' '));
+    const output_grid: string[][] = [];
+    for (let r = 0; r < height; r++) {
+        const row: string[] = [];
+        for (let c = 0; c < width; c++) {
+            row.push(' ');
+        }
+        output_grid.push(row);
+    }
 
     // Copy plot lines to the output grid with offsets
     for (let r = 0; r < plot_lines.length; r++) {
         for (let c = 0; c < plot_lines[r].length; c++) {
-            output_grid[r + x_label_height][c + y_label_width] = plot_lines[r][c];
+            output_grid[r + x_label_height + (border ? 1 : 0)][c + y_label_width + (border ? 1 : 0)] = plot_lines[r][c];
+        }
+    }
+
+    // Draw border
+    if (border) {
+        const plot_start_x = y_label_width + 1;
+        const plot_start_y = x_label_height;
+        const plot_end_x = y_label_width + plot_width + 1;
+        const plot_end_y = x_label_height + plot_height + 1;
+
+        // Corners
+        output_grid[plot_start_y][plot_start_x - 1] = '┌';
+        output_grid[plot_start_y][plot_end_x] = '┐';
+        output_grid[plot_end_y][plot_start_x - 1] = '└';
+        output_grid[plot_end_y][plot_end_x] = '┘';
+
+        // Horizontal lines
+        for (let i = plot_start_x; i < plot_end_x; i++) {
+            output_grid[plot_start_y][i] = '─';
+            output_grid[plot_end_y][i] = '─';
+        }
+
+        // Vertical lines
+        for (let i = plot_start_y + 1; i < plot_end_y; i++) {
+            output_grid[i][plot_start_x - 1] = '│';
+            output_grid[i][plot_end_x] = '│';
         }
     }
 
     // Draw y-labels
     if (ylabels > 0) {
-        const yTicks = _getTicks(ymin, ymax, ylabels);
         yTicks.forEach(tick => {
             const label = tick.toFixed(2); // Truncate to 2 decimal places
-            // Calculate the y-position (line number) for the label
-            const canvas_y = y_range === 0
-                ? Math.floor(plot_height / 2)
-                : (plot_height - 1) - Math.floor(((tick - ymin) / y_range) * (plot_height - 1));
-            const line_num = canvas_y + x_label_height;
+            const plot_area_offset_y = x_label_height + (border ? 1 : 0);
+            const line_num_unclamped = plot_area_offset_y + (1 - ((tick - ymin) / y_range)) * (plot_height - 1);
+            const line_num = Math.floor(Math.max(0, Math.min(height - 1, line_num_unclamped)));
 
             // Insert label into the output grid
+            const start_col = y_label_width - label.length;
             for (let i = 0; i < label.length; i++) {
-                if (line_num >= 0 && line_num < height && i < y_label_width) {
-                    output_grid[line_num][i] = label[i];
+                if (line_num >= 0 && line_num < height && start_col + i >= 0 && start_col + i < y_label_width) {
+                    output_grid[line_num][start_col + i] = label[i];
                 }
+            }
+
+            // Draw y-axis tick on border
+            if (border) {
+                output_grid[line_num][y_label_width - 1] = '┤'; // Right-facing tick on left border
             }
         });
     }
 
     // Draw x-labels
     if (xlabels > 0) {
-        const xTicks = _getTicks(xmin, xmax, xlabels);
         xTicks.forEach(tick => {
             const label = tick.toFixed(2); // Truncate to 2 decimal places
             // Calculate the x-position (column number) for the label
             const canvas_x = x_range === 0
                 ? Math.floor(plot_width / 2)
                 : Math.floor(((tick - xmin) / x_range) * (plot_width - 1));
-            const col_num = canvas_x + y_label_width;
+            const col_num = Math.floor(canvas_x + y_label_width + (border ? 1 : 0) - (label.length / 2));
 
             // Insert label into the output grid
             for (let i = 0; i < label.length; i++) {
                 if (col_num + i >= 0 && col_num + i < width && height - 1 >= 0 && height - 1 < height) {
                     output_grid[height - 1][col_num + i] = label[i];
                 }
+            }
+
+            // Draw x-axis tick on border
+            if (border) {
+                output_grid[height - 1 - (border ? 1 : 0)][Math.floor(canvas_x + y_label_width + (border ? 1 : 0))] = '┬'; // Upward-facing tick on bottom border
             }
         });
     }
