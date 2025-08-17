@@ -53,3 +53,17 @@ Different logical complemonents are broken out into their own files for good cod
     - Write tests for the coordinate scaling logic.
     - Write integration tests for the `plot` function to verify the output for a simple scatter plot.
 10. **Proof of Concept**: Create a `test.ts` file that imports the `plot` function, provides it with sample data, and prints the resulting plot to the console to demonstrate a working proof-of-concept.
+
+## Git Operations Policy
+
+**NEVER use destructive git operations on committed history, especially on the `main` branch.**
+
+Destructive operations, such as `git reset --hard <commit-hash>`, rewrite commit history and can lead to lost work or inconsistencies for collaborators. Once a commit is part of the shared history (e.g., pushed to `main`), it must be considered immutable.
+
+Instead, use non-destructive alternatives for managing changes:
+
+*   **To revert specific files to a previous state:** Use `git checkout <commit-hash> -- <file-path>`.
+*   **To undo a commit while preserving history:** Use `git revert <commit-hash>`. This creates a new commit that undoes the changes of a previous commit.
+*   **To amend the most recent commit (if not yet pushed):** Use `git commit --amend`.
+
+This policy ensures a clear, traceable, and stable commit history for all contributors.
