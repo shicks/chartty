@@ -1,5 +1,5 @@
 {
-  "name": "dotplot",
+  "name": "chartty",
   "version": "0.1.0",
   "description": "Pure JS library for making scatter plots in the terminal with braille dots",
   "main": "dist/index.js",
@@ -12,16 +12,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shicks/dotplot.git"
+    "url": "git+https://github.com/shicks/chartty.git"
   },
-  "keywords": ["terminal", "plot", "chart", "braille", "cli", "typescript", "javascript"],
+  "keywords": ["terminal", "chart", "plot", "braille", "cli", "typescript", "javascript"],
   "author": "Your Name <your.email@example.com>",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/shicks/dotplot/issues"
+    "url": "https://github.com/shicks/chartty/issues"
   },
-  "homepage": "https://github.com/shicks/dotplot#readme",
+  "homepage": "https://github.com/shicks/chartty#readme",
   "devDependencies": {
     "@types/jest": "^30.0.0",
     "jest": "^30.0.5",
